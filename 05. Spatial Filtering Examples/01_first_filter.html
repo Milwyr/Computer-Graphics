@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spatial Processing - First Filter</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+    <script src="imageproc.js"></script>
+    <script src="filter.js"></script>
+    <script src="javascript/01_first_filter.js"></script>
+</head>
+<body onload="initPage()">
+    <h1>Spatial Processing - First Filter</h1>
+
+    <!-- The Image Canvas -->
+    <table>
+        <tr>
+            <td>Source Image:
+                <!-- The Source Image Selection -->
+                <select id="source_image"
+                        onchange="imageproc.updateSourceImage()">
+                    <option value="images/hkust.png">HKUST</option>
+                    <option value="images/sunset.png">Sunset Peak</option>
+                    <option value="images/geopark.png">Geo Park</option>
+                    <option value="images/parthenon.png">Parthenon</option>
+                    <option value="images/ape.png">Laughing Ape</option>
+                </select>
+            </td>
+            <td>Result Image:</td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Source Image Canvas -->
+                <canvas id="source" width="400" height="300"></canvas>
+            </td>
+            <td>
+                <!-- The Result Image Canvas -->
+                <canvas id="result" width="400" height="300"></canvas>
+            </td>
+        </tr>
+    </table>
+
+    <!-- The Controls Area -->
+    <table>
+        <tr>
+            <td>Flipping:</td>
+            <td>
+                <!-- Whether the Kernel is Flipped -->
+                <select id="flip">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Clipping:</td>
+            <td>
+                <!-- The processing for the resulting pixel -->
+                <select id="clip">
+                    <option value="clip">Clipping to [0, 255]</option>
+                    <option value="normalise">Normalisation</option>
+                    <option value="offset">Offset</option>
+                    <option value="absolute">Using Absolute</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Boundaries:</td>
+            <td>
+                <!-- Boundary Cases -->
+                <select id="edge">
+                    <option value="extend">Extending edges</option>
+                    <option value="wrap">Wrapping around</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Apply Button -->
+                <button onclick="imageproc.apply()">Apply Filter</button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

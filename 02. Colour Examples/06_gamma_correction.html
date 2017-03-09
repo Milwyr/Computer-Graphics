@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Gamma Correction</title>
+    <script src="06_gamma_correction.js"></script>
+</head>
+<body onload="loadImage()">
+    <canvas id="2dcanvas" width="300" height="350"
+            style="border: 1px black solid"></canvas>
+    <br>
+    <p>
+    <input id="gamma_slider" type="range" min="0" max="20" value="10"
+           onchange="gammaCorrect()">
+    <br>
+    Gamma value: <span id="gamma_value">1.0</span>
+    </p>
+</body>
+</html>

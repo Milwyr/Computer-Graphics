@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spatial Processing - Directional Blur</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+    <script src="imageproc.js"></script>
+    <script src="filter.js"></script>
+    <script src="javascript/06_directional_blur.js"></script>
+</head>
+<body onload="initPage()">
+    <h1>Spatial Processing - Directional Blur</h1>
+
+    <!-- The Image Canvas -->
+    <table>
+        <tr>
+            <td>Source Image:
+                <!-- The Source Image Selection -->
+                <select id="source_image"
+                        onchange="imageproc.updateSourceImage()">
+                    <option value="images/hkust.png">HKUST</option>
+                    <option value="images/sunset.png">Sunset Peak</option>
+                    <option value="images/geopark.png">Geo Park</option>
+                    <option value="images/parthenon.png">Parthenon</option>
+                    <option value="images/ape.png">Laughing Ape</option>
+                </select>
+            </td>
+            <td>Result Image:</td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Source Image Canvas -->
+                <canvas id="source" width="400" height="300"></canvas>
+            </td>
+            <td>
+                <!-- The Result Image Canvas -->
+                <canvas id="result" width="400" height="300"></canvas>
+            </td>
+        </tr>
+    </table>
+
+    <!-- The Controls Area -->
+    <table>
+        <tr>
+            <td>Blur Direction:</td>
+            <td>
+                <!-- The Direction of the Blur Filter -->
+                <select id="direction">
+                    <option value="horizontal">Horizontal</option>
+                    <option value="vertical">Vertical</option>
+                    <option value="nwse">NWSE Diagonal</option>
+                    <option value="nesw">NESW Diagonal</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Apply Button -->
+                <button onclick="imageproc.apply()">Apply Filter</button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

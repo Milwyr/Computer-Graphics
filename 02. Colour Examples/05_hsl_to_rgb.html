@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Converting From HSL to RGB</title>
+    <script src="colour_conversion.js"></script>
+    <style>
+    #color_box {
+         width: 100px;
+         height: 50px;
+         border: 1px solid black;
+         background: black;
+    }
+    </style>
+    <script>
+    function convert(component) {
+        var slider = document.getElementById(component);
+        var span = document.getElementById(component + "_span");
+
+        span.innerHTML = slider.value;
+
+        var h = document.getElementById("hue").value / 360;
+        var s = document.getElementById("saturation").value / 100;
+        var l = document.getElementById("lightness").value / 100;
+
+        var rgb = hslToRgb(h, s, l);
+        var r = parseInt(rgb["r"] * 255);
+        var g = parseInt(rgb["g"] * 255);
+        var b = parseInt(rgb["b"] * 255);
+
+        span = document.getElementById("rgb_span");
+        span.innerHTML = "(" + r + ", " + g + ", " + b + ")";
+
+        var box = document.getElementById("color_box");
+        box.style.background = "rgb" + span.innerHTML;
+    }
+    </script>
+</head>
+<body>
+    <p>
+    <input id="hue" type="range"
+           min="0" max="359" value="0" onchange="convert('hue')">
+    <br>
+    Hue: <span id="hue_span">0</span>
+    </p>
+    <p>
+    <input id="saturation" type="range"
+           min="0" max="100" value="0" onchange="convert('saturation')">
+    <br>
+    Saturation: <span id="saturation_span">0</span>
+    </p>
+    <p>
+    <input id="lightness" type="range"
+           min="0" max="100" value="0" onchange="convert('lightness')">
+    <br>
+    Lightness: <span id="lightness_span">0</span>
+    </p>
+    <p>RGB value = <span id="rgb_span">(0, 0, 0)</span></p>
+    <div id="color_box"
+         style="width: 100px; height: 50px; border: 1px solid black; "></div>
+</body>
+</html>

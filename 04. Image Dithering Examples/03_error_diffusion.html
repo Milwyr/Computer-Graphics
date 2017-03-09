@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Image Dithering - Error Diffusing Dither</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+    <script src="imageproc.js"></script>
+    <script src="javascript/03_error_diffusion.js"></script>
+</head>
+<body onload="initPage()">
+    <h1>Image Dithering - Error Diffusing Dither</h1>
+
+    <!-- The Image Canvas -->
+    <table>
+        <tr>
+            <td>Source Image:
+                <!-- The Source Image Selection -->
+                <select id="source_image"
+                        onchange="imageproc.updateSourceImage()">
+                    <option value="images/hkust.png">HKUST</option>
+                    <option value="images/obama.png">Obama</option>
+                    <option value="images/sofia.png">Princess Sofia</option>
+                    <option value="images/buddha.png">Big Buddha</option>
+                    <option value="images/sky.png">The Sky</option>
+                </select>
+            </td>
+            <td>Result Image:</td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Source Image Canvas -->
+                <canvas id="source" width="400" height="300"></canvas>
+            </td>
+            <td>
+                <!-- The Result Image Canvas -->
+                <canvas id="result" width="400" height="300"></canvas>
+            </td>
+        </tr>
+    </table>
+
+    <!-- The Controls Area -->
+    <table>
+        <tr>
+            <td>
+                <!-- The Apply Button -->
+                <button onclick="imageproc.apply()">Apply Dither</button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

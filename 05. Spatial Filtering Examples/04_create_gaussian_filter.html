@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spatial Processing - Creating Gaussian Filter</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+    <style>
+    #kernel {
+        font-family: Consolas, monaco, monospace; 
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    #kernel div.column {
+        float: left;
+    }
+    #kernel div.column div {
+        padding: 5px 10px;
+        text-align: center;
+    }
+    #kernel div.divisor {
+        clear: both;
+    }
+    </style>
+    <script>
+    /* Create a Gaussian filter */
+    function createKernel() {
+        /* Get the parameters */
+        var sigma = parseFloat(document.getElementById("sigma").value);
+        var size = parseInt(document.getElementById("size").value);
+
+        /* Values checking */
+        if (isNaN(sigma) || sigma <= 0) {
+            alert("Please enter a positive sigma value.");
+            return;
+        }
+        if (isNaN(size) || size < 3) {
+            alert("Please enter a size bigger than 2.");
+            return;
+        }
+
+        /* Create the kernel */
+        var variance = sigma * sigma;
+        var kernel = [];
+        for (var y = 0; y < size; y++) {
+            kernel[y] = [];
+            for (var x = 0; x < size; x++) {
+                var dx = x - Math.floor(size / 2);
+                var dy = y - Math.floor(size / 2);
+                kernel[y][x] = 1 / (2 * Math.PI * variance) *
+                    Math.pow(Math.E, -(dx * dx + dy * dy) / (2 * variance));
+            }
+        }
+
+        /* Normalize the kernel */
+        var corner = kernel[0][0];
+        var divisor = 0;
+        for (var y = 0; y < size; y++) {
+            for (var x = 0; x < size; x++) {
+                kernel[y][x] = Math.round(kernel[y][x] / corner);
+                divisor = divisor + kernel[y][x];
+            }
+        }
+
+        /* Show the kernel */
+        var kernelDiv = document.getElementById("kernel");
+        kernelDiv.innerHTML = "";
+        for (var x = 0; x < size; x++) {
+            var div = "<div class='column'>";
+            for (var y = 0; y < size; y++) {
+                div += "<div>" + kernel[y][x] + "</div>";
+            }
+            div += "</div>";
+
+            kernelDiv.innerHTML += div;
+        }
+        kernelDiv.innerHTML +=
+            "<div class='divisor'>Divisor: " + divisor + "</div>";
+    }
+    </script>
+</head>
+<body>
+    <h1>Spatial Processing - Creating Gaussian Filter</h1>
+
+    <table>
+        <tr>
+            <td>Sigma:</td>
+            <td>
+                <!-- The Sigma of the Distribution -->
+                <input id="sigma" type="text" value="1">
+            </td>
+        </tr>
+        <tr>
+            <td>Kernel Size:</td>
+            <td>
+                <!-- The Size of the Kernel -->
+                <input id="size" type="text" value="3">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Create Button -->
+                <button onclick="createKernel()">Create Kernel</button>
+            </td>
+        </tr>
+    </table>
+    <div id="kernel"></div>
+</body>
+</html>

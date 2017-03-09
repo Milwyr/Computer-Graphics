@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Noise Reduction - Bilateral Filter</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="slider.css">
+    <script src="imageproc.js"></script>
+    <script src="filter.js"></script>
+    <script>
+    /* Init the page with the imageproc javascript module */
+    function initPage() {
+        imageproc.init("source", "result", "source_image");
+    }
+
+    /* Set up the filtering operation */
+    imageproc.operation = function(sourceImage, resultImage, params) {
+        /* Get the parameters first */
+        var size = parseInt(params["size"]);
+        var sigmaR = parseInt(params["sigmaR"]);
+
+        /* Compute the variances */
+        var sigmaS = size / 4;
+        var varS = sigmaS * sigmaS;
+        var varR = sigmaR * sigmaR;
+
+        var mid = Math.floor(size / 2);
+
+        /* Apply the bilateral filter */
+        for (var y = 0; y < sourceImage.height; y++) {
+            for (var x = 0; x < sourceImage.width; x++) {
+                var r = 0, g = 0, b = 0;
+                var centre = imageproc.getPixel(sourceImage, x, y);
+                var cI = centre.r * 0.2126 +
+                         centre.g * 0.7152 +
+                         centre.b * 0.0722;
+                var weight = 0;
+
+                /* Apply the spatial and range kernel on the current pixel */
+                for (var j = -mid; j <= mid; j++) {
+                    for (var i = -mid; i <= mid; i++) {
+                        var pixel =
+                            imageproc.getPixel(sourceImage, x + i, y + j);
+                        var pI = pixel.r * 0.2126 +
+                                 pixel.g * 0.7152 +
+                                 pixel.b * 0.0722;
+
+                        /* Find the spatial coefficients */
+                        var distS = i * i + j * j;
+                        var coeffS = Math.pow(Math.E, -distS / (2 * varS));
+
+                        /* Find the range coefficients */
+                        var distR = Math.pow(pI - cI, 2);
+                        var coeffR = Math.pow(Math.E, -distR / (2 * varR));
+
+                        /* Apply the kernel values to the pixel */
+                        r += pixel.r * coeffS * coeffR;
+                        g += pixel.g * coeffS * coeffR;
+                        b += pixel.b * coeffS * coeffR;
+
+                        /* Add the coefficients to spatial weight */
+                        weight += coeffS * coeffR;
+                    }
+                }
+
+                var i = (x + y * resultImage.width) * 4;
+
+                resultImage.data[i] = r / weight;
+                resultImage.data[i + 1] = g / weight;
+                resultImage.data[i + 2] = b / weight;
+            }
+        }
+    }
+    imageproc.paramIds = ["size", "sigmaR"];
+    </script>
+</head>
+<body onload="initPage()">
+    <h1>Noise Reduction - Bilateral Filter</h1>
+
+    <!-- The Image Canvas -->
+    <table>
+        <tr>
+            <td>Source Image:
+                <!-- The Source Image Selection -->
+                <select id="source_image"
+                        onchange="imageproc.updateSourceImage()">
+                    <option value="images/hkust.png">HKUST</option>
+                    <option value="images/disneyland_gaussian5.png">Disneyland (Gaussion Noise s=5)</option>
+                    <option value="images/disneyland_gaussian20.png">Disneyland (Gaussion Noise s=20)</option>
+                    <option value="images/disneyland_saltpepper1.png">Disneyland (Salt and Pepper Noise 1%)</option>
+                    <option value="images/disneyland_saltpepper10.png">Disneyland (Salt and Pepper Noise 10%)</option>
+                </select>
+            </td>
+            <td>Result Image:</td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Source Image Canvas -->
+                <canvas id="source" width="400" height="300"></canvas>
+            </td>
+            <td>
+                <!-- The Result Image Canvas -->
+                <canvas id="result" width="400" height="300"></canvas>
+            </td>
+        </tr>
+    </table>
+
+    <!-- The Controls Area -->
+    <table>
+        <tr>
+            <td>Kernel Size:</td>
+            <td>
+                <!-- The Kernel Size -->
+                <input id="size" type="range"
+                       min="3" max="13" step="2" value="5"
+                       oninput="imageproc.updateInputValue(this)"
+                       onchange="imageproc.updateInputValue(this)">
+                <span id="size_value">5</span>
+            </td>
+        </tr>
+        <tr>
+            <td>Sigma for Range:</td>
+            <td>
+                <!-- The Sigma value for the Range kernel -->
+                <input id="sigmaR" type="range" min="1" max="128" value="10"
+                       oninput="imageproc.updateInputValue(this)"
+                       onchange="imageproc.updateInputValue(this)">
+                <span id="sigmaR_value">10</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!-- The Apply Button -->
+                <button onclick="imageproc.apply()">Apply Smoothing</button>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
