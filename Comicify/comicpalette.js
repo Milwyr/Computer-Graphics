@@ -1,7 +1,7 @@
 (function(imageproc) {
     "use strict";
 
-    /* Comic palette colour list */
+    // Comic palette colour list
     var palette = [
         [254, 251, 198],
         [255, 247, 149],
@@ -70,15 +70,70 @@
         [255, 255, 255],
     ];
 
-    /*
-     * Convert the colours in the input data to comic colours
+    /**
+     * Convert the colours in the input data to comic colours.
+     * @param {number} saturation - the saturation factor between 1 and 10
      */
     imageproc.useComicPalette = function(inputData, outputData, saturation) {
+        // Iterate all the colour pixels, and each colour pixel contains
+        // four values: red, green, blue, alpha.
         for (var i = 0; i < inputData.data.length; i += 4) {
-            outputData.data[i]     = inputData.data[i];
-            outputData.data[i + 1] = inputData.data[i + 1];
-            outputData.data[i + 2] = inputData.data[i + 2];
+            var comicPixel;
+          
+            if (saturation > 1) {
+                // Increase the saturation by the given saturation factor
+                var hslPixel = imageproc.fromRGBToHSL(inputData.data[i],
+                    inputData.data[i + 1], inputData.data[i + 2]);
+                hslPixel.s *= saturation;
+                var newPixel = imageproc.fromHSLToRGB(
+                    hslPixel.h, hslPixel.s, hslPixel.l);
+                
+                // The approximation of colour from the pre-defined
+                // colour palette that is closest to the given pixel
+                comicPixel = pickColourFromPalette(
+                    newPixel.r, newPixel.g, newPixel.b);
+            } else {
+                // The approximation of colour from the pre-defined
+                // colour palette that is closest to the given pixel
+                comicPixel = pickColourFromPalette(inputData.data[i],
+                    inputData.data[i + 1], inputData.data[i + 2]);
+            }
+            
+            // Store the pixel with colour selected from the palette for output
+            outputData.data[i] = comicPixel[0];
+            outputData.data[i + 1] = comicPixel[1];
+            outputData.data[i + 2] = comicPixel[2];
         }
+    }
+    
+    /**
+    * Return the index of colour palette that is closest to the given colour
+    * pixel with the RGB values.
+    * @param r {number} - Red value of the given colour pixel
+    * @param g {number} - Green value of the given colour pixel
+    * @param b {number} - Blue value of the given colour pixel
+    */
+    function pickColourFromPalette(r, g, b) {
+        var minimumDistance = Number.MAX_VALUE;
+        
+        // The index in colour palette
+        var chosenColourIndex = 0;
+        
+        for (var index = 0; index < palette.length; index++) {
+            var p = palette[index];
+            
+            // This value indicates how close the colour in the palette is
+            // compared to the given RGB colour
+            var distance = Math.sqrt(Math.pow(r - p[0], 2) +
+                Math.pow(g - p[1], 2) + Math.pow(b - p[2], 2));
+            
+            // Update minimum distance so the closest colour can be recorded
+            if (distance < minimumDistance) {
+                chosenColourIndex = index;
+                minimumDistance = distance;
+            }
+        }
+        return palette[chosenColourIndex];
     }
  
 }(window.imageproc = window.imageproc || {}));

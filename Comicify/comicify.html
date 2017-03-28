@@ -54,11 +54,30 @@
         /* Apply dithering */
         var ditheredImage;
         if (display.shade == "dither") {
-            var matrix = [
-                [1, 3],
-                [4, 2]
-            ];
-            var levels = 5;
+            var matrix = [];
+            
+            // Each level accounts for 5% width (100% / 20 = 5%)
+            var levels = 20;
+            
+            if (dither.pattern === "lines") {
+                // 15% [0,1,2] pure black, and 10% [3,4] diagonal stripe
+                matrix = [
+                    [3, 3, 5],
+                    [3, 5, 3],
+                    [5, 3, 3]
+                ];
+            } else {
+                // 15% [0,1,2] pure black, and 10% [3,4] diamond pattern
+                matrix = [
+                    [3, 3, 3, 5, 3, 3, 3],
+                    [3, 3, 5, 3, 5, 3, 3],
+                    [3, 5, 3, 3, 3, 5, 3],
+                    [5, 3, 3, 3, 3, 3, 5],
+                    [3, 5, 3, 3, 3, 5, 3],
+                    [3, 3, 5, 3, 5, 3, 3],
+                    [3, 3, 3, 5, 3, 3, 3]
+                ];
+            }
 
             ditheredImage = imageproc.createBuffer(sourceImage);
             imageproc.dither(sourceImage, ditheredImage, matrix, levels);
@@ -118,9 +137,12 @@
         case "dither":
             /* Show ordered dithering */
             for (var i = 0; i < resultImage.data.length; i+=4) {
-                resultImage.data[i]     = ditheredImage.data[i];
-                resultImage.data[i + 1] = ditheredImage.data[i + 1];
-                resultImage.data[i + 2] = ditheredImage.data[i + 2];
+                // Only draw black
+                if (ditheredImage.data[i] === 0) {
+                  resultImage.data[i]     = ditheredImage.data[i];
+                  resultImage.data[i + 1] = ditheredImage.data[i + 1];
+                  resultImage.data[i + 2] = ditheredImage.data[i + 2];
+                }
             }
             break;
         }
@@ -130,9 +152,12 @@
         case "canny":
             /* Show Canny edge result */
             for (var i = 0; i < resultImage.data.length; i+=4) {
-                resultImage.data[i]     = cannyImage.data[i];
-                resultImage.data[i + 1] = cannyImage.data[i + 1];
-                resultImage.data[i + 2] = cannyImage.data[i + 2];
+                // Only draw white
+                if (cannyImage.data[i] === 255) {
+                  resultImage.data[i]     = 255 - cannyImage.data[i];
+                  resultImage.data[i + 1] = 255 - cannyImage.data[i + 1];
+                  resultImage.data[i + 2] = 255 - cannyImage.data[i + 2];
+                }
             }
             break;
         }
@@ -161,6 +186,7 @@
                     <option value="images/spiderman.png">Spiderman</option>
                     <option value="images/superman.png">Superman</option>
                     <option value="images/trooper.png">Stormtroopers</option>
+                    <option value="images/me.png">Mlton Li</option>
                     <option value="images/grayscale.png">Grayscale Test</option>
                 </select>
             </td>

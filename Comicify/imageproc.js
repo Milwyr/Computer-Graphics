@@ -139,35 +139,6 @@
     }
 
     /*
-     * Convert HSL to RGB
-     */
-    imageproc.fromHSLToRGB = function(h, s, l) {
-        /*
-         * Internal function to get RGB from hue
-         */
-        function fromHueToRGB(m1, m2, h) {
-            if (h < 0) h = h + 1;
-            if (h > 1) h = h - 1;
-            if (h * 6 < 1) return m1 + (m2 - m1) * h * 6;
-            if (h * 2 < 1) return m2;
-            if (h * 3 < 2) return m1 + (m2 - m1) * (2/3 - h) * 6;
-            return m1;
-        }
-
-        h = h / 360.0;
-        var m1, m2;
-        if (l <= 0.5) m2 = l * (s + 1);
-        else m2 = l + s - l * s;
-        m1 = l * 2 - m2;
-        var r = fromHueToRGB(m1, m2, h + 1/3)
-        var g = fromHueToRGB(m1, m2, h)
-        var b = fromHueToRGB(m1, m2, h - 1/3)
-        return {"r": Math.round(r * 255),
-                "g": Math.round(g * 255),
-                "b": Math.round(b * 255)};
-    }
-
-    /*
      * Get a pixel colour from an ImageData object
      * 
      * The parameter border can be either "extend" (default) and "wrap"

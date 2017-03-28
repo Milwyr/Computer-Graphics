@@ -1,39 +1,48 @@
 (function(imageproc) {
     "use strict";
 
-    /*
+    /**
      * Apply Kuwahara filter to the input data
+     * @param {number} size - Size of the Kuwahara filter
      */
     imageproc.kuwahara = function(inputData, outputData, size) {
         /* An internal function to find the regional stat centred at (x, y) */
         function regionStat(x, y) {
-            /* Find the mean colour and brightness */
+            // This distance represents the linear distance from the
+            // starting cell to the cell in the centre in each region.
+            // Note that a kuwahara filter is divided into four regions.
+            var distance = Math.floor(size/4);
+
+            // Total number of cells in each of the sub-regions
+            var numberOfCells = Math.pow(size/2 + 0.5, 2);
+
+            // Find the mean colour and brightness
             var meanR = 0, meanG = 0, meanB = 0;
             var meanValue = 0;
-            for (var j = -1; j <= 1; j++) {
-                for (var i = -1; i <= 1; i++) {
+            for (var j = -distance; j <= distance; j++) {
+                for (var i = -distance; i <= distance; i++) {
                     var pixel = imageproc.getPixel(inputData, x + i, y + j);
 
-                    /* For the mean colour */
+                    // For the mean colour
                     meanR += pixel.r;
                     meanG += pixel.g;
                     meanB += pixel.b;
 
-                    /* For the mean brightness */
+                    // For the mean brightness
                     meanValue += pixel.r * 0.2126 +
                                  pixel.g * 0.7152 +
                                  pixel.b * 0.0722;
                 }
             }
-            meanR /= 9;
-            meanG /= 9;
-            meanB /= 9;
-            meanValue /= 9;
+            meanR /= numberOfCells;
+            meanG /= numberOfCells;
+            meanB /= numberOfCells;
+            meanValue /= numberOfCells;
 
-            /* Find the variance */
+            // Find the variance
             var variance = 0;
-            for (var j = -1; j <= 1; j++) {
-                for (var i = -1; i <= 1; i++) {
+            for (var j = -distance; j <= distance; j++) {
+                for (var i = -distance; i <= distance; i++) {
                     var pixel = imageproc.getPixel(inputData, x + i, y + j);
                     var value = pixel.r * 0.2126 +
                                 pixel.g * 0.7152 +
@@ -42,9 +51,9 @@
                     variance += Math.pow(value - meanValue, 2);
                 }
             }
-            variance /= 9;
+            variance /= numberOfCells;
 
-            /* Return the mean and variance as an object */
+            // Return the mean and variance as an object
             return {
                 mean: {r: meanR, g: meanG, b: meanB},
                 variance: variance
@@ -91,5 +100,5 @@
             }
         }
     }
- 
+
 }(window.imageproc = window.imageproc || {}));

@@ -1,23 +1,43 @@
 (function(imageproc) {
     "use strict";
 
-    /*
+    /**
      * Apply a Gaussian filter to the input data
+     * @param {number} size - Size of the Gaussian filter
      */
     imageproc.gaussianBlur = function(inputData, outputData, size) {
-        /* Calculate the sigma value */
-        var sigma = 0;
+        // This sigma value is defined in the specification
+        var sigma = size / 4;
 
-        /* Make the row/column matrix */
+        // Instantiate the row/column matrix, note that the matrix is symmetric
+        // and hence the row matrix and the column matrix are equivalent
         var rowMatrix = [];
 
-        /* Create the kernel */
-        var kernel = [
-            [1, 2, 1],
-            [2, 5, 2],
-            [1, 2, 1]
-        ];
-        var divisor = 17;
+        // Generate a row matrix, i.e. 1 dimensional Gaussian kernel
+        for (var i = 0; i < size; i++) {
+            var distanceToCentre = Math.abs(size/2 - i - 0.5);
+            var coefficient = 1 / (Math.sqrt(2 * Math.PI) * sigma);
+            var exponent = Math.exp(
+                -Math.pow(distanceToCentre, 2) / (2 * sigma * sigma));
+            rowMatrix[i] = coefficient * exponent;
+        }
+
+        // Instantiate a two dimentional Gaussian kernel
+        var kernel = [];
+        for (var i = 0; i < size; i++) {
+            kernel[i] = [];
+        }
+
+        // Convolute the row and column matrix (they are equivalent)
+        // to obtain the two dimentional Gaussian kernel, and calculate
+        // the divisor by summing up all the elements in the kernel
+        var divisor = 0;
+        for (var i = 0; i < size; i++) {
+            for (var j = 0; j < size; j++) {
+                kernel[i][j] = rowMatrix[i] * rowMatrix[j];
+                divisor += kernel[i][j];
+            }
+        }
 
         /***** DO NOT REMOVE - for marking *****/
         var line = "";
@@ -65,5 +85,5 @@
             }
         }
     }
- 
+
 }(window.imageproc = window.imageproc || {}));
