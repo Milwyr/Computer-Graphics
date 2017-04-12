@@ -1,0 +1,1 @@
+This is assignment 2 of the module CSIT5400 Computer Graphics. This robot has six components: a body, a head, two arms and two legs. Each component can be rotated appropriately.

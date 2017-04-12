@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spaceship</title>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec3 a_Position;
+
+    uniform vec2 u_Position;
+    uniform float u_Angle;
+
+    void main() {
+        float angle = radians(u_Angle); // convert degrees to radians
+
+        /* Setup rotation matrix */
+        float c = cos(angle);
+        float s = sin(angle);
+        mat4 rotation = mat4(mat2(c, s, -s, c));
+
+        /* Setup translation matrix */
+        mat4 translation = mat4(1);
+        translation[3][0] = u_Position.x;
+        translation[3][1] = u_Position.y;
+
+        /* Setup orthographic projection */
+        mat4 ortho = mat4(
+             2.0 / 640.0, 0,           0, 0,
+             0,           2.0 / 480.0, 0, 0,
+             0,           0,          -1, 0,
+            -1,          -1,           0, 1
+        );
+
+        gl_Position = ortho * translation * rotation * vec4(a_Position, 1);
+    }
+    </script>
+    <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    void main() {
+        gl_FragColor = vec4(1, 0, 0, 1);
+    }
+    </script>
+    <script>
+    var gl;
+    var positionAttrib, positionBuffer;
+    var positionLoc, angleLoc;
+    var position = [320, 240], angle = 0;
+
+    var spaceshipMove = 0, spaceshipTurn = 0;
+
+    function createShader(id, type) {
+        var shader = gl.createShader(type);
+
+        /* Compile the shader from the source code */
+        gl.shaderSource(shader, document.getElementById(id).text);
+        gl.compileShader(shader);
+
+        var status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (!status) {
+            /* Show any compilation error */
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    function createProgram() {
+        /* Create and compile the shaders */
+        var vshader = createShader("vertex-shader", gl.VERTEX_SHADER);
+        if (vshader == null) return null;
+        var fshader = createShader("fragment-shader", gl.FRAGMENT_SHADER);
+        if (fshader == null) return null;
+
+        /* Create and link the program */
+        var program = gl.createProgram();
+        gl.attachShader(program, vshader);
+        gl.attachShader(program, fshader);
+        gl.linkProgram(program);
+
+        var status = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (!status) {
+            /* Show any linking error */
+            alert(gl.getProgramInfoLog(program));
+            return;
+        }
+
+        /* Use the program */
+        gl.useProgram(program);
+
+        /* Prepare the input attributes of the program */
+        positionAttrib = gl.getAttribLocation(program, "a_Position");
+        gl.enableVertexAttribArray(positionAttrib);
+
+        /* Prepare the input uniforms of the program */
+        positionLoc = gl.getUniformLocation(program, "u_Position");
+        angleLoc = gl.getUniformLocation(program, "u_Angle");
+    }
+
+    function createVertexBuffers() {
+        /* Position buffer */
+        positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        var positionArray = new Float32Array([
+             20,   0, 0,
+            -20, -10, 0,
+            -20,  10, 0
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, positionArray, gl.STATIC_DRAW);
+    }
+
+    function initKeyEvents() {
+        /* Set up the key events to control the spaceship */
+        document.addEventListener('keydown', function(event) {
+            switch (event.key) {
+            case "ArrowUp":
+                spaceshipMove = 2;
+                break;
+            case "ArrowDown":
+                spaceshipMove = -2;
+                break;
+            case "ArrowLeft":
+                spaceshipTurn = 3;
+                break;
+            case "ArrowRight":
+                spaceshipTurn = -3;
+            }
+        });
+        document.addEventListener('keyup', function(event) {
+            switch (event.key) {
+            case "ArrowUp":
+            case "ArrowDown":
+                spaceshipMove = 0;
+                break;
+            case "ArrowLeft":
+            case "ArrowRight":
+                spaceshipTurn = 0;
+            }
+        });
+    }
+
+    function initWebGL() {
+        /* Get the WebGL context */
+        var canvas = document.getElementById("webgl_canvas");
+        gl = canvas.getContext("webgl") ||
+             canvas.getContext("experimental-webgl");
+
+        /* Initialize the WebGL environment */
+        if (gl) {
+            gl.clearColor(0, 0, 0, 1);
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+
+            createProgram();
+            createVertexBuffers();
+            initKeyEvents();
+
+            /* Update the canvas content */
+            window.requestAnimationFrame(render);
+        }
+    }
+
+    function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        /* Bind the vertex buffers */
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(positionAttrib, 3, gl.FLOAT, false, 0, 0);
+
+        /* Set the uniforms */
+        gl.uniform2fv(positionLoc, position);
+        gl.uniform1f(angleLoc, angle);
+
+        /* Update the spaceship location */
+        position[0] += spaceshipMove * Math.cos(angle * Math.PI / 180);
+        position[1] += spaceshipMove * Math.sin(angle * Math.PI / 180);
+        angle += spaceshipTurn;
+
+        /* Draw the vertex buffers as triangles */
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        window.requestAnimationFrame(render);
+    }
+    </script>
+</head>
+<body onload="initWebGL()">
+    <canvas id="webgl_canvas" width="640" height="480"
+            style="border: 1px black solid"></canvas>
+</body>
+</html>

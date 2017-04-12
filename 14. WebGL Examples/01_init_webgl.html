@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Initializing WebGL</title>
+    <script>
+    var gl;
+
+    function initWebGL() {
+        // Get the WebGL context
+        var canvas = document.getElementById("webgl_canvas");
+        gl = canvas.getContext("webgl") ||
+             canvas.getContext("experimental-webgl");
+
+        // Initialise the WebGL environment
+        if (gl) {
+            gl.clearColor(0, 0, 0, 1);
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+        }
+    }
+    </script>
+</head>
+<body onload="initWebGL()">
+    <canvas id="webgl_canvas" width="640" height="480"
+            style="border: 1px black solid"></canvas>
+</body>
+</html>

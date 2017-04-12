@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Drawing a Simple Triangle</title>
+    
+    <!-- Vertex Shader -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute vec3 a_Position;
+    attribute vec3 a_Color;
+
+    varying vec3 v_Color;
+
+    void main() {
+        gl_Position = vec4(a_Position, 1);
+        v_Color = a_Color;
+    }
+    </script>
+    
+    <!-- Fragment Shader -->
+    <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec3 v_Color;
+
+    void main() {
+        gl_FragColor = vec4(v_Color, 1);
+    }
+    </script>
+    <script>
+    var gl;
+    var positionAttrib, colorAttrib;
+    var positionBuffer, colorBuffer;
+
+    function createShader(id, type) {
+        var shader = gl.createShader(type);
+
+        // Compile the shader from the source code
+        gl.shaderSource(shader, document.getElementById(id).text);
+        gl.compileShader(shader);
+
+        var status = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+        if (!status) {
+            // Show any compilation error
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    function createProgram() {
+        // Create and compile the shaders
+        var vshader = createShader("vertex-shader", gl.VERTEX_SHADER);
+        if (vshader == null) return null;
+        var fshader = createShader("fragment-shader", gl.FRAGMENT_SHADER);
+        if (fshader == null) return null;
+
+        // Create and link the program
+        var program = gl.createProgram();
+        gl.attachShader(program, vshader);
+        gl.attachShader(program, fshader);
+        gl.linkProgram(program);
+
+        var status = gl.getProgramParameter(program, gl.LINK_STATUS);
+        if (!status) {
+            // Show any linking error
+            alert(gl.getProgramInfoLog(program));
+            return;
+        }
+
+        // Use the program
+        gl.useProgram(program);
+
+        // Prepare the input attributes of the program
+        positionAttrib = gl.getAttribLocation(program, "a_Position");
+        gl.enableVertexAttribArray(positionAttrib);
+        colorAttrib = gl.getAttribLocation(program, "a_Color");
+        gl.enableVertexAttribArray(colorAttrib);
+    }
+
+    function createVertexBuffers() {
+        /* Position buffer */
+        positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        var positionArray = new Float32Array([
+             0.0,  0.8, 0.0,
+            -0.8, -0.8, 0.0,
+             0.8, -0.8, 0.0
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, positionArray, gl.STATIC_DRAW);
+
+        /* Colour buffer */
+        colorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        var colorArray = new Float32Array([
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, colorArray, gl.STATIC_DRAW);
+    }
+
+    function initWebGL() {
+        // Get the WebGL context
+        var canvas = document.getElementById("webgl_canvas");
+        gl = canvas.getContext("webgl") ||
+             canvas.getContext("experimental-webgl");
+
+        // Initialise the WebGL environment
+        if (gl) {
+            gl.clearColor(0, 0, 0, 1);
+
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+
+            createProgram();
+            createVertexBuffers();
+
+            // Update the canvas content
+            window.requestAnimationFrame(render);
+        }
+    }
+
+    function render() {
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Bind the vertex buffers
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(positionAttrib, 3, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.vertexAttribPointer(colorAttrib, 3, gl.FLOAT, false, 0, 0);
+
+        // Draw the vertex buffers as triangles
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        window.requestAnimationFrame(render);
+    }
+    </script>
+</head>
+<body onload="initWebGL()">
+    <canvas id="webgl_canvas" width="640" height="480"
+            style="border: 1px black solid"></canvas>
+</body>
+</html>
