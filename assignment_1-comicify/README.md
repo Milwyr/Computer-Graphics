@@ -1,0 +1,1 @@
+This is assignment 1 of the module CSIT5400 Computer Graphics. I implemented several algorithms to apply post processing effects on photos.
