@@ -1,0 +1,1 @@
+This is assignment 3 of the module CSIT5400 Computer Graphics. A moon is rendered using different texture mapping techniques. There are four types of moon: a greyish sphere (stage 0), texture mapping (stage 1), normal mapping (stage 2) and face mapping (stage 3).
