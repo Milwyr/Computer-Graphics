@@ -48,6 +48,7 @@
 
         // ** For stage 1 onwards
         // You will need to output the texture coordinates
+        v_TexCoord = a_texcoord;
 
         // ** For stage 2 onwards
         // You will need to find:
@@ -138,7 +139,7 @@
         // colours based on the current stage of the Moon
 
         /* Assign the fragment colour */
-        gl_FragColor = vec4(color, 1);
+        gl_FragColor = vec4(color, 1) * texture2D(u_ColorMap, v_TexCoord);
     }
     </script>
     <script>
@@ -150,6 +151,10 @@
     var stage = 0;
     var projMatrix, viewMatrix;
     var uniforms = {};
+    var colourMap, normalMap;
+    
+    // A flag to indicate whether the light source is far away from the moon
+    var useDistantLightSource = false;
 
     var mouseInfo = {
         motion: false,
@@ -236,18 +241,21 @@
         /* Set up the key events */
         document.addEventListener('keydown', function(event) {
             switch (event.key) {
-            case "0":   // No map
-                stage = 0;
-                break;
-            case "1":   // Moon texture
-                stage = 1;
-                break;
-            case "2":   // Normal map
-                stage = 2;
-                break;
-            case "3":   // Face texture
-                stage = 3;
-                break;
+                case "0":   // No map
+                    stage = 0;
+                    break;
+                case "1":   // Moon texture
+                    stage = 1;
+                    break;
+                case "2":   // Normal map
+                    stage = 2;
+                    break;
+                case "3":   // Face texture
+                    stage = 3;
+                    break;
+                case "l":
+                    useDistantLightSource = !useDistantLightSource;
+                    break;
             }
         });
     }
@@ -276,6 +284,8 @@
 
             // ** For stage 1 onwards
             // You need to create all relevant textures here
+            colourMap = twgl.createTexture(gl, { src: "colormap.png", flipY: true });
+            normalMap = twgl.createTexture(gl, { src: "normalmap.png", flipY: true });
 
             /* Initialise the mouse and keys */
             initMouseEvents();
@@ -323,7 +333,9 @@
         setupMaterial([0.8, 0.8, 0.75], [0.8, 0.8, 0.75], [0, 0, 0], 1);
 
         // ** For stage 1 onwards
-        // You need to pass the textures as uniforms to the shader appropriately
+        // Pass the textures as uniforms to the shader appropriately
+        uniforms.u_ColorMap = colourMap;
+        uniforms.u_NormalMap = normalMap;
 
         /* Pass the current stage of the Moon to the shader */
         uniforms.u_Stage = stage;
@@ -355,9 +367,11 @@
         // the distant light source, i.e.:
         // 1. Transform the light position with the view matrix
         // 2. Rotate the light position during animation, if required
-
-        /* Set up the light */
-        setupLight([0.1, 0.1, 0.1], [1, 1, 1], [0, 0, 0]);
+        
+        // Set up the light with either distant or nearby light position
+        var position = useDistantLightSource ?
+                m4.transformPoint(viewMatrix, [10000,0,0]) : [0,0,0];
+        setupLight([0.1, 0.1, 0.1], [1, 1, 1], position);
 
         /* Draw the objects */
         drawMoon();
