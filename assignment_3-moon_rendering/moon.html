@@ -46,24 +46,21 @@
         v_Vertex = (u_ModelViewMatrix * vec4(a_position, 1)).xyz;
         v_Normal = normalize(mat3(u_NormalMatrix) * a_normal);
 
-        // ** For stage 1 onwards
-        // You will need to output the texture coordinates
+        // ** For stage 1 onwards:  output the texture coordinates
         v_TexCoord = a_texcoord;
 
         // ** For stage 2 onwards
-        // You will need to find:
         // 1. The T, B and N vectors
-        vec3 a_biTangent = normalize(a_normal * a_tangent);
+        vec3 N = v_Normal;
+        vec3 T = normalize(mat3(u_NormalMatrix) * a_tangent);
+        vec3 B = cross(N, T);
         
         // 2. The T, B and N vectors in the eye space
-        vec3 v_eye_T = (u_ModelViewMatrix * vec4(a_tangent, 1)).xyz;
-        vec3 v_eye_B = (u_ModelViewMatrix * vec4(a_biTangent, 1)).xyz;
-        vec3 v_eye_N = (u_ModelViewMatrix * vec4(a_normal, 1)).xyz;
         
         // 3. The TBN matrix
-        v_TBNMatrix = mat3(v_eye_T, v_eye_B, v_eye_N);
+        v_TBNMatrix = mat3(T, B, N);
 
-        /* Output the vertex position in clip space */
+        // Output the vertex position in clip space
         gl_Position = u_ModelViewProjMatrix * vec4(a_position, 1);
     }
     </script>
@@ -119,6 +116,11 @@
         // You will need to retrieve and transform the normal, i.e:
         // 1. Retrieve and restore the normal from the normal map
         // 2. Transform the normal using the TBN matrix
+        if (u_Stage == 2) {
+            normal = texture2D(u_NormalMap, v_TexCoord).rgb;
+            normal = normalize(normal * 2.0 - 1.0);
+            normal = normalize(v_TBNMatrix * normal);
+        } 
 
         // Find the ambient component
         vec3 ambient = u_MaterialAmbient * u_WorldAmbient;
@@ -150,10 +152,10 @@
         
         if (u_Stage == 0) {
             gl_FragColor = vec4(color, 1);
-        } else if (u_Stage == 1) {
+        } else if (u_Stage == 1 || u_Stage == 2) {
             gl_FragColor = vec4(color, 1) * texture2D(u_ColorMap, v_TexCoord);
-        } else if (u_Stage == 2) {
-            gl_FragColor = vec4(color, 1) * texture2D(u_NormalMap, v_TexCoord);
+        } else if (u_Stage == 3) {
+            gl_FragColor = vec4(color, 1) * texture2D(u_FaceMap, v_TexCoord);
         }
     }
     </script>

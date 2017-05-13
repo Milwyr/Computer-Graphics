@@ -6,7 +6,7 @@ var sphere;
 var stage = 0;
 var projMatrix, viewMatrix;
 var uniforms = {};
-var colourMap, normalMap;
+var colourMap, normalMap, faceMap;
 var animationTimer;
 
 // Position of the light source
@@ -20,7 +20,7 @@ var mouseInfo = {
 }
 
 function createSphereTangents(arrays, subdivisionsAxis, subdivisionsHeight) {
-    /* Calculate the tangents of each sphere position */
+    // Calculate the tangents of each sphere position
     var numVertices = (subdivisionsAxis + 1) * (subdivisionsHeight + 1);
     var tangents = primitives.createAugmentedTypedArray(3, numVertices);
     for (var y = 0; y <= subdivisionsHeight; y++) {
@@ -155,8 +155,12 @@ function initWebGL() {
 
         // ** For stage 1 onwards
         // You need to create all relevant textures here
-        colourMap = twgl.createTexture(gl, { src: "colormap.png", flipY: true });
-        normalMap = twgl.createTexture(gl, { src: "normalmap.png", flipY: true });
+        colourMap = twgl.createTexture(gl,
+                { src: "images/colormap.png", flipY: true });
+        normalMap = twgl.createTexture(gl,
+                { src: "images/normalmap.png", flipY: true });
+        faceMap = twgl.createTexture(gl,
+                { src: "images/me.png", flipY: true });
 
         // Initialise the mouse and keys
         initMouseEvents();
@@ -207,6 +211,7 @@ function drawMoon() {
     // Pass the textures as uniforms to the shader appropriately
     uniforms.u_ColorMap = colourMap;
     uniforms.u_NormalMap = normalMap;
+    uniforms.u_FaceMap = faceMap;
 
     // Pass the current stage of the Moon to the shader
     uniforms.u_Stage = stage;
